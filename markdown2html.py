@@ -20,13 +20,26 @@ def convert_markdown_to_html(markdown_file, output_file):
 
     # Open HTML file for writing
     with open(output_file, 'w') as html_file:
-        listOpen = False
+        ulOpen = False
+        olOpen = False
         for line in markdown_content:
             # Check if the line is a Markdown heading
-            if line.startswith("#"):
-                if listOpen == True:
+            if line.startswith("*"):
+                if ulOpen == True:
                     html_file.write("</ul>\n")
-                    listOpen = False
+                    ulOpen = False
+                if olOpen == False:
+                    html_file.write("<ol>\n")
+                    olOpen = True
+                li_content = line.strip("*").strip()
+                html_file.write(f"<li>{li_content}</li>\n")
+            elif line.startswith("#"):
+                if olOpen == True:
+                    html_file.write("</ol>\n")
+                    olOpen = False
+                if ulOpen == True:
+                    html_file.write("</ul>\n")
+                    ulOpen = False
                 # Extract the heading level and content
                 heading_level = line.count("#")
                 heading_content = line.strip("#").strip()
@@ -37,20 +50,29 @@ def convert_markdown_to_html(markdown_file, output_file):
                     f"</h{heading_level}>\n"
                 )
             elif line.startswith("-"):
-                if listOpen == False:
+                if olOpen == True:
+                    html_file.write("</ol>\n")
+                    olOpen = False
+                if ulOpen == False:
                     html_file.write("<ul>\n")
-                    listOpen = True
+                    ulOpen = True
                 li_content = line.strip("-").strip()
                 html_file.write(f"<li>{li_content}</li>\n")
             else:
-                if listOpen == True:
+                if olOpen == True:
+                    html_file.write("</ol>\n")
+                    olOpen = False
+                if ulOpen == True:
                     html_file.write("</ul>\n")
-                    listOpen = False
+                    ulOpen = False
                 # Write the line as it is
                 html_file.write(line)
-        if listOpen:
+        if ulOpen:
             html_file.write("</ul>\n")
-            listOpen = False
+            ulOpen = False
+        if olOpen:
+            html_file.write("</ol>\n")
+            olOpen = False
 
 
 if __name__ == "__main__":
