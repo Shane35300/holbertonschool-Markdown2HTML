@@ -20,9 +20,13 @@ def convert_markdown_to_html(markdown_file, output_file):
 
     # Open HTML file for writing
     with open(output_file, 'w') as html_file:
+        listOpen = False
         for line in markdown_content:
             # Check if the line is a Markdown heading
             if line.startswith("#"):
+                if listOpen == True:
+                    html_file.write("</ul>\n")
+                    listOpen = False
                 # Extract the heading level and content
                 heading_level = line.count("#")
                 heading_content = line.strip("#").strip()
@@ -32,9 +36,21 @@ def convert_markdown_to_html(markdown_file, output_file):
                     f"{heading_content}"
                     f"</h{heading_level}>\n"
                 )
+            elif line.startswith("-"):
+                if listOpen == False:
+                    html_file.write("<ul>\n")
+                    listOpen = True
+                li_content = line.strip("-").strip()
+                html_file.write(f"<li>{li_content}</li>\n")
             else:
+                if listOpen == True:
+                    html_file.write("</ul>\n")
+                    listOpen = False
                 # Write the line as it is
                 html_file.write(line)
+        if listOpen:
+            html_file.write("</ul>\n")
+            listOpen = False
 
 
 if __name__ == "__main__":
