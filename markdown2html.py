@@ -22,9 +22,13 @@ def convert_markdown_to_html(markdown_file, output_file):
     with open(output_file, 'w') as html_file:
         ulOpen = False
         olOpen = False
+        pOpen = False
         for line in markdown_content:
             # Check if the line is a Markdown heading
             if line.startswith("*"):
+                if pOpen == True:
+                    html_file.write("</p>\n")
+                    pOpen = False
                 if ulOpen == True:
                     html_file.write("</ul>\n")
                     ulOpen = False
@@ -34,6 +38,9 @@ def convert_markdown_to_html(markdown_file, output_file):
                 li_content = line.strip("*").strip()
                 html_file.write(f"<li>{li_content}</li>\n")
             elif line.startswith("#"):
+                if pOpen == True:
+                    html_file.write("</p>\n")
+                    pOpen = False
                 if olOpen == True:
                     html_file.write("</ol>\n")
                     olOpen = False
@@ -50,6 +57,9 @@ def convert_markdown_to_html(markdown_file, output_file):
                     f"</h{heading_level}>\n"
                 )
             elif line.startswith("-"):
+                if pOpen == True:
+                    html_file.write("</p>\n")
+                    pOpen = False
                 if olOpen == True:
                     html_file.write("</ol>\n")
                     olOpen = False
@@ -65,14 +75,27 @@ def convert_markdown_to_html(markdown_file, output_file):
                 if ulOpen == True:
                     html_file.write("</ul>\n")
                     ulOpen = False
-                # Write the line as it is
-                html_file.write(line)
+                if len(line) > 1:
+                    if pOpen == False:
+                        html_file.write("<p>\n")
+                        pOpen = True
+                    else:
+                        html_file.write("<br/>\n")
+                    p_content = line.strip()
+                    html_file.write(f"{p_content}\n")
+                else:
+                    if pOpen == True:
+                        html_file.write("</p>\n")
+                        pOpen = False
         if ulOpen:
             html_file.write("</ul>\n")
             ulOpen = False
         if olOpen:
             html_file.write("</ol>\n")
             olOpen = False
+        if pOpen:
+            html_file.write("</p>\n")
+            pOpen = False
 
 
 if __name__ == "__main__":
